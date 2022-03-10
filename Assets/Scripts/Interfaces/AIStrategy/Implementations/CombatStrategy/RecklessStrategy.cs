@@ -9,7 +9,7 @@ public class RecklessStrategy : ACombatStrategy
     private AIController AIController { get => Self.GetComponent<AIController>(); }
     private BattleController BattleController { get => AIController.BattleController; }
     private Creature Creature { get => Self.GetComponent<Creature>(); }
-    private GroundController GroundController { get => AIController.GroundController; }
+    private GroundController GroundController { get => BattleController.GroundController; }
     public RecklessStrategy(GameObject go)
     {
         Self = go;
@@ -39,7 +39,7 @@ public class RecklessStrategy : ACombatStrategy
         Creature closest = null;
         float distance = float.MaxValue;
 
-        foreach (Creature combatant in BattleController.entities)
+        foreach (Creature combatant in BattleController.Entities)
         {
             if (combatant.Equals(Self) || combatant.Equals(closest))
             {

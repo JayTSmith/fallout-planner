@@ -7,10 +7,8 @@ public static class CharacterFactory
     private static Dictionary<NPCDefintions.NPC_ID, System.Func<GameCharacter>> builderMap = new Dictionary<NPCDefintions.NPC_ID, System.Func<GameCharacter>>
     {
         [NPCDefintions.NPC_ID.BANDIT] = BuildGenericRaider,
-        [NPCDefintions.NPC_ID.SWOLE_BOI] = BuildSwoleBoi,
         [NPCDefintions.NPC_ID.GHOUL] = BuildFeralGhoul,
         [NPCDefintions.NPC_ID.BIGGHOUL] = BuildGlowingGhoul,
-        [NPCDefintions.NPC_ID.TOWNEE] = BuildHumanRandom,
         [NPCDefintions.NPC_ID.CHARLIE] = BuildCharlie,
         [NPCDefintions.NPC_ID.KENZIE] = BuildKenzie,
         [NPCDefintions.NPC_ID.PEYTON] = BuildPeyton,
@@ -34,8 +32,8 @@ public static class CharacterFactory
 
         gc[GameCharacter.Skill.UNARMED] = 4;
 
-        gc.MaxHealth = () => 28;
-        gc.Health = gc.MaxHealth();
+        gc.MaxHealth = 28;
+        gc.Health = gc.MaxHealth;
         gc.Faction = Faction.FactionInfo.CRITTER;
         gc.Name = "Glowing One";
 
@@ -57,8 +55,8 @@ public static class CharacterFactory
         };
 
         gc[GameCharacter.Skill.UNARMED] = 2;
-        gc.MaxHealth = () => 10;
-        gc.Health = gc.MaxHealth();
+        gc.MaxHealth = 10;
+        gc.Health = gc.MaxHealth;
         gc.Faction = Faction.FactionInfo.CRITTER;
         gc.Name = "Feral Ghoul";
 
@@ -82,7 +80,9 @@ public static class CharacterFactory
 
         gc[GameCharacter.Skill.ENERGY] = 5;
 
-        gc.Health = gc.MaxHealth();
+        gc.MaxHealth = 28;
+        gc.Health = gc.MaxHealth;
+
         gc.Faction = Faction.FactionInfo.PLAYER_PARTY;
         gc.Name = "Jack McKay (Michael)";
         return gc;
@@ -105,7 +105,9 @@ public static class CharacterFactory
 
         gc[GameCharacter.Skill.BALLISTIC] = 5;
 
-        gc.Health = gc.MaxHealth();
+        gc.MaxHealth = 26;
+        gc.Health = gc.MaxHealth;
+
         gc.Faction = Faction.FactionInfo.PLAYER_PARTY;
         gc.Name = "Nazem Kadri (Charlie)";
         return gc;
@@ -129,7 +131,9 @@ public static class CharacterFactory
         gc[GameCharacter.Skill.ENERGY] = 3;
         gc[GameCharacter.Skill.UNARMED] = 3;
 
-        gc.Health = gc.MaxHealth();
+        gc.MaxHealth = 28;
+        gc.Health = gc.MaxHealth;
+
         gc.Faction = Faction.FactionInfo.PLAYER_PARTY;
         gc.Name = "Castor Yarrow (Kenzie)";
         return gc;
@@ -152,7 +156,9 @@ public static class CharacterFactory
 
         gc[GameCharacter.Skill.BALLISTIC] = 2;
 
-        gc.Health = gc.MaxHealth();
+        gc.MaxHealth = 18;
+        gc.Health = gc.MaxHealth;
+
         gc.Faction = Faction.FactionInfo.PLAYER_PARTY;
         gc.Name = "Gen. Zandreck (Peyton)";
         return gc;
@@ -176,7 +182,9 @@ public static class CharacterFactory
         gc[GameCharacter.Skill.BALLISTIC] = 2;
         gc[GameCharacter.Skill.EXPLOSIVES] = 2;
 
-        gc.Health = gc.MaxHealth();
+        gc.MaxHealth = 24;
+        gc.Health = gc.MaxHealth;
+
         gc.Faction = Faction.FactionInfo.PLAYER_PARTY;
         gc.Name = "Papermate Classic (Steven)";
         return gc;
@@ -185,48 +193,6 @@ public static class CharacterFactory
     public static GameCharacter Build(NPCDefintions.NPC_ID nid)
     {
         return builderMap[nid]();
-    }
-    
-    public static GameCharacter BuildHumanRandom()
-    {
-        GameCharacter gc = new GameCharacter();
-
-        foreach (GameCharacter.SPECIAL special in System.Enum.GetValues(typeof(GameCharacter.SPECIAL)))
-        {
-            gc[special] = Die.makeDie(10).Roll();
-        }
-
-        foreach (GameCharacter.Skill skill in System.Enum.GetValues(typeof(GameCharacter.Skill)))
-        {
-            gc[skill] = Die.makeDie(10).Roll();
-        }
-
-        gc.Health = gc.MaxHealth();
-        gc.Faction = 0;
-        gc.Name = "Townee";
-        return gc;
-    }
-
-    internal static GameCharacter BuildSwoleBoi()
-    {
-        GameCharacter gc = new GameCharacter();
-
-        gc.Special = new Dictionary<GameCharacter.SPECIAL, int>
-        {
-            [GameCharacter.SPECIAL.STRENGTH] = 10,
-            [GameCharacter.SPECIAL.PERCEPTION] = 10,
-            [GameCharacter.SPECIAL.ENDURANCE] = 10,
-            [GameCharacter.SPECIAL.CHARISMA] = 10,
-            [GameCharacter.SPECIAL.INTELLIGENCE] = 10,
-            [GameCharacter.SPECIAL.AGILITY] = 10,
-            [GameCharacter.SPECIAL.LUCK] = 10,
-        };
-
-        gc[GameCharacter.Skill.BALLISTIC] = 2;
-        gc.Health = gc.MaxHealth();
-        gc.Faction = Faction.FactionInfo.SWOLE | Faction.FactionInfo.TOWNEE;
-        gc.Name = "Swole Townee";
-        return gc;
     }
 
     public static GameCharacter BuildGenericRaider()
@@ -244,11 +210,12 @@ public static class CharacterFactory
             [GameCharacter.SPECIAL.LUCK] = 3,
         };
 
-        gc.MaxHealth = () => 14;
+        gc.MaxHealth = 14;
+        gc.Health = gc.MaxHealth;
 
         gc[GameCharacter.Skill.BALLISTIC] = 2;
+        
         gc.Faction = Faction.FactionInfo.BANDIT;
-        gc.Health = gc.MaxHealth();
         gc.Name = "Raider";
         return gc;
     }

@@ -3830,7 +3830,7 @@ MonoBehaviour:
   spawn:
     armorID: 0
     weaponID: 1
-    npcID: 9
+    npcID: 7
   spawnRadius: 1
   spawnNumber: 1
 --- !u!114 &1082099969
@@ -3850,7 +3850,7 @@ MonoBehaviour:
   spawn:
     armorID: 0
     weaponID: 5
-    npcID: 8
+    npcID: 4
   spawnRadius: 1
   spawnNumber: 1
 --- !u!1 &1636832040
@@ -5097,8 +5097,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeBetweenTurns: 0
-  groundController: {fileID: 27398193}
-  triggerCombatOnStart: 1
 --- !u!1 &2109795065
 GameObject:
   m_ObjectHideFlags: 0

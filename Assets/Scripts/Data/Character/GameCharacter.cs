@@ -32,10 +32,8 @@ public class GameCharacter
         [Skill.UNARMED] = SPECIAL.ENDURANCE
     };
 
-    private int level;
-
     public int Health { get; set; }
-    public System.Func<int> MaxHealth { get; set; }
+    public int MaxHealth { get; set; }
     public Dictionary<SPECIAL, int> Special { get; set; }
     public Dictionary<Skill, int> Skills { get; set; }
 
@@ -73,21 +71,20 @@ public class GameCharacter
 
     public GameCharacter() 
     {
-        level = 1;
         Special = new Dictionary<SPECIAL, int>();
         Skills = new Dictionary<Skill, int>();
 
-        foreach (GameCharacter.SPECIAL special in System.Enum.GetValues(typeof(GameCharacter.SPECIAL)))
+        foreach (SPECIAL special in System.Enum.GetValues(typeof(SPECIAL)))
         {
             this[special] = 1;
         }
 
-        foreach (GameCharacter.Skill skill in System.Enum.GetValues(typeof(GameCharacter.Skill)))
+        foreach (Skill skill in System.Enum.GetValues(typeof(Skill)))
         {
             this[skill] = 0;
         }
 
-        MaxHealth = () => 12 + 2 * this[SPECIAL.ENDURANCE] + (level - 1) * (4 + GetSpecialMod(SPECIAL.ENDURANCE));
+        MaxHealth = 1;
         Health = 1;
         CurrentMovePoints = 1;
         EquippedWeapon = WeaponFactory.BuildHuntingRifle();
@@ -149,6 +146,6 @@ public class GameCharacter
     }
     internal int GetSkillSpecialMod(Skill s)
     {
-        return GetSpecialMod(GameCharacter.SkillSpecial[s]);
+        return GetSpecialMod(SkillSpecial[s]);
     }
 }

@@ -51,7 +51,7 @@ public class Creature : MonoBehaviour
 
         if (collider && Input.GetMouseButtonDown(0) && collider.OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
         {
-            Debug.Log($"{GameCharacter.Name} - Health: {GameCharacter.Health} / {GameCharacter.MaxHealth()}");
+            Debug.Log($"{GameCharacter.Name} - Health: {GameCharacter.Health} / {GameCharacter.MaxHealth}");
         }
     }
 

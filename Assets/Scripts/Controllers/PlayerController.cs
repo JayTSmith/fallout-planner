@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+[Obsolete("This needs to be re-worked to be in production again.", false)]
 public class PlayerController : MonoBehaviour
 {
     [SerializeField]
@@ -18,8 +20,8 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GameCharacter = CharacterFactory.BuildHumanRandom();
-        GameCharacter.Health = GameCharacter.MaxHealth();
+        // GameCharacter = CharacterFactory.BuildHumanRandom();
+        // GameCharacter.Health = GameCharacter.MaxHealth();
 
         GetComponent<Creature>().GameCharacter = GameCharacter;
 

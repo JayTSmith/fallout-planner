@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class BattleController : MonoBehaviour
 {
-    enum BattleState 
+    enum BattleStates 
     {
         NOTSTARTED,
         TURNSTART,
@@ -19,34 +19,32 @@ public class BattleController : MonoBehaviour
         TURNEND,
         REFRESHING
     }
-    public List<Creature> entities { get; private set; } = new List<Creature>();
+    public List<Creature> Entities { get; private set; } = new List<Creature>();
     private int currentIdx = -1;
     [SerializeField]
     private float timeBetweenTurns;
     private float timeWaited;
 
     [SerializeField]
-    private GroundController groundController;
+    public GroundController GroundController;
 
-    [SerializeField]
-    private bool triggerCombatOnStart = false;
-    private BattleState battleState = BattleState.NOTSTARTED;
+    private BattleStates BatteState = BattleStates.NOTSTARTED;
     public GameObject CurrentPlayer 
     {
         get 
         {
             {
-                if (currentIdx < entities.Count)
+                if (currentIdx < Entities.Count)
                 {
-                    return entities[currentIdx].gameObject;
+                    return Entities[currentIdx].gameObject;
                 }
                 return null;
             }
         }
             
     }
-    public bool IsCombat { get => battleState != BattleState.NOTSTARTED && battleState != BattleState.REFRESHING; }
-    public int roundNum { get; private set; }
+    public bool IsCombat { get => BatteState != BattleStates.NOTSTARTED && BatteState != BattleStates.REFRESHING; }
+    public int RoundNum { get; private set; }
 
 
     public void Attack(Creature attacker, Creature defender) {
@@ -67,7 +65,7 @@ public class BattleController : MonoBehaviour
         int aimPenalty = 0;
         if (atkChar.EquippedWeapon.WeaponType != WeaponType.UNARMED && atkChar.EquippedWeapon.WeaponType !=WeaponType.MELEE)
         {
-            if (!groundController.HasLineOfSight(attacker, defender))
+            if (!GroundController.HasLineOfSight(attacker, defender))
             {
                 Debug.Log($"{atkChar.Name} cannot see their target, {defChar.Name}.", attacker);
                 return;
@@ -119,7 +117,7 @@ public class BattleController : MonoBehaviour
         }
         else
         {
-            lineColor = new Vector4(255 * (1 - (defChar.Health / ((float) defChar.MaxHealth()))), 0, 0, 255);
+            lineColor = new Vector4(255 * (1 - (defChar.Health / ((float) defChar.MaxHealth))), 0, 0, 255);
         }
 
         Debug.Log($"{atkChar.Name} -> {defChar.Name}" +
@@ -137,10 +135,10 @@ public class BattleController : MonoBehaviour
 
     void Kill(Creature c) 
     {
-        if (entities.Contains(c)) 
+        if (Entities.Contains(c)) 
         {
-            entities.Remove(c);
-            if (currentIdx >= entities.Count)
+            Entities.Remove(c);
+            if (currentIdx >= Entities.Count)
             {
                 RoundEnd();
             }
@@ -150,69 +148,60 @@ public class BattleController : MonoBehaviour
 
     private void RoundStart()
     {
-        Debug.Log($"Round {++roundNum} is starting!");
+        Debug.Log($"Round {++RoundNum} is starting!");
     }
 
     private void RoundEnd()
     {
-        Debug.Log($"Round {roundNum} is over!");
+        Debug.Log($"Round {RoundNum} is over!");
         currentIdx = 0;
     }
 
     public void RefreshStatus() 
     {
-        entities.Clear();
+        Entities.Clear();
         foreach (GameObject go in GameObject.FindGameObjectsWithTag("Being"))
         {
             if (go.activeInHierarchy)
-                entities.Add(go.GetComponent<Creature>());
+                Entities.Add(go.GetComponent<Creature>());
         }
 
         foreach (GameObject go in GameObject.FindGameObjectsWithTag("Player"))
         {
             if (go.activeInHierarchy)
-                entities.Add(go.GetComponent<Creature>());
+                Entities.Add(go.GetComponent<Creature>());
         }
         
         currentIdx = 0;
-        roundNum = 0;
-        battleState = BattleState.NOTSTARTED;
+        RoundNum = 0;
+        BatteState = BattleStates.NOTSTARTED;
         RollInitiatives();
     }
 
     private void RollInitiatives()
     {
-        foreach (Creature cc in entities)
+        foreach (Creature cc in Entities)
         {
             cc.GameCharacter.RollInitiative();
         }
 
-        entities.Sort((Creature lhs, Creature rhs) => rhs.GameCharacter.Initiative.CompareTo(lhs.GameCharacter.Initiative));
+        Entities.Sort((Creature lhs, Creature rhs) => rhs.GameCharacter.Initiative.CompareTo(lhs.GameCharacter.Initiative));
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        if (triggerCombatOnStart)
-        {
-            roundNum = 0;
-            RefreshStatus();
-            battleState = BattleState.TURNSTART;
-        }
+        RoundNum = 0;
+        RefreshStatus();
+        BatteState = BattleStates.TURNSTART;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F6) && !IsCombat)
-        {
-            battleState = BattleState.TURNSTART;
-        }
-
         if (Input.GetKeyDown(KeyCode.F5))
         {
             SpawnPoint[] spawners = FindObjectsOfType<SpawnPoint>();
-
 
             foreach (SpawnPoint spawner in spawners)
             {
@@ -227,62 +216,62 @@ public class BattleController : MonoBehaviour
             RefreshStatus();
         }
 
-        if (entities.Count == 0)
-            battleState = BattleState.NOTSTARTED;
+        if (Entities.Count == 0)
+            BatteState = BattleStates.NOTSTARTED;
 
         if (IsCombat)
         {
-            AIController ac = entities[currentIdx].GetComponent<AIController>();
-            PlayerController pc = entities[currentIdx].GetComponent<PlayerController>();
-            if (battleState == BattleState.TURNSTART)
+            AIController ac = Entities[currentIdx].GetComponent<AIController>();
+            //PlayerController pc = Entities[currentIdx].GetComponent<PlayerController>();
+            if (BatteState == BattleStates.TURNSTART)
             {
                 if (currentIdx == 0)
                     RoundStart();
-                Creature curCreature = entities[currentIdx];
+                Creature curCreature = Entities[currentIdx];
                 curCreature.GameCharacter.CurrentMovePoints = curCreature.GameCharacter.MaxMovePoints;
 
                 if (ac != null)
                 {
                     StartCoroutine(ac.CombatStrategy.DoMovement());
-                    battleState = BattleState.AIMOVING;
+                    BatteState = BattleStates.AIMOVING;
                 }
 
-                if (entities[currentIdx].GetComponent<PlayerController>() != null)
-                    battleState = BattleState.PLAYERTURN;
+                //if (Entities[currentIdx].GetComponent<PlayerController>() != null)
+                //    BatteState = BattleStates.PLAYERTURN;
             }
 
-            else if (battleState == BattleState.AIMOVING)
+            else if (BatteState == BattleStates.AIMOVING)
             {
-                if (!entities[currentIdx].IsMoving)
+                if (!Entities[currentIdx].IsMoving)
                 {
-                    battleState = BattleState.AIATTACK;
+                    BatteState = BattleStates.AIATTACK;
                 }
             }
-            else if (battleState == BattleState.AIATTACK)
+            else if (BatteState == BattleStates.AIATTACK)
             {
                 ac.CombatStrategy.DoCombatAction();
-                battleState = BattleState.AISUPPORT;
+                BatteState = BattleStates.AISUPPORT;
             }
-            else if (battleState == BattleState.AISUPPORT)
+            else if (BatteState == BattleStates.AISUPPORT)
             {
                 ac.CombatStrategy.DoSupportAction();
-                battleState = BattleState.AIBONUS;
+                BatteState = BattleStates.AIBONUS;
             }
-            else if (battleState == BattleState.AIBONUS)
+            else if (BatteState == BattleStates.AIBONUS)
             {
                 ac.CombatStrategy.DoBonusAction();
-                battleState = BattleState.TURNEND;
+                BatteState = BattleStates.TURNEND;
             }
-            else if (battleState == BattleState.TURNEND)
+            else if (BatteState == BattleStates.TURNEND)
             {
                 if (timeWaited > timeBetweenTurns)
                 {
                     timeWaited = 0f;
                     bool continueCombat = false;
-                    bool roundEnded = currentIdx + 1 >= entities.Count;
+                    bool roundEnded = currentIdx + 1 >= Entities.Count;
 
-                    Faction.FactionInfo faction = entities[currentIdx].GameCharacter.Faction;
-                    foreach (Creature c in entities)
+                    Faction.FactionInfo faction = Entities[currentIdx].GameCharacter.Faction;
+                    foreach (Creature c in Entities)
                     {
                         if ((c.GameCharacter.Faction & faction) == 0)
                         {
@@ -294,10 +283,10 @@ public class BattleController : MonoBehaviour
                     currentIdx++;
 
                     if (continueCombat)
-                        battleState = BattleState.TURNSTART;
+                        BatteState = BattleStates.TURNSTART;
                     else
                     {
-                        battleState = BattleState.NOTSTARTED;
+                        BatteState = BattleStates.NOTSTARTED;
                     }
 
                     if (roundEnded || !continueCombat)

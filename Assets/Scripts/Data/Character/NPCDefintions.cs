@@ -9,8 +9,6 @@ public static class NPCDefintions
         BANDIT,
         GHOUL,
         BIGGHOUL,
-        SWOLE_BOI,
-        TOWNEE,
         KENZIE,
         PEYTON,
         STEVEN,
@@ -21,8 +19,6 @@ public static class NPCDefintions
     public static Dictionary<NPC_ID, Color> NPCColors { get; private set; } = new Dictionary<NPC_ID, Color>()
     {
         [NPC_ID.BANDIT] = Color.red,
-        [NPC_ID.SWOLE_BOI] = Color.cyan,
-        [NPC_ID.TOWNEE] = Color.green,
         [NPC_ID.PEYTON] = Color.green,
         [NPC_ID.MICHAEL] = Color.cyan,
         [NPC_ID.CHARLIE] = Color.blue,
