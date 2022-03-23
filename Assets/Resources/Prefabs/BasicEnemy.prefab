@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GroundController: {fileID: 0}
-  baseMoveTime: 0.03
+  baseMoveTime: 0
   scaleMoveTime: 0
 --- !u!114 &8978075048316679441
 MonoBehaviour:

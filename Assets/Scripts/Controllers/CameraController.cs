@@ -5,13 +5,15 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
 
-    private float outOfBoundsPercent = .02f;
+    private float outOfBoundsPercent = .05f;
     private float movementSpeed = 8.0f;
 
     private float zoomScalar = 0.2f;
     private float minZoom = 1.0f;
-    private float maxZoom = 10.0f;
+    private float maxZoom = 100.0f;
 
+    [Range(1.0f, 100.0f), SerializeField]
+    private float startZoom = 10.0f;
 
     [SerializeField]
     private GameObject homeObject;
@@ -19,6 +21,7 @@ public class CameraController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Camera.main.orthographicSize = startZoom;
     }
 
     // Update is called once per frame

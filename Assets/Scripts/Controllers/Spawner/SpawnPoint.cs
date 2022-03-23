@@ -2,6 +2,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TabletopSimulator.Controller;
 
 public class SpawnPoint : MonoBehaviour
 {
