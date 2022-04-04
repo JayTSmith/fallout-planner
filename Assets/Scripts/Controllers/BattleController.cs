@@ -30,11 +30,11 @@ namespace TabletopSimulator.Controller
         [SerializeField]
         private float timeBetweenTurns;
         private float timeWaited;
-
-        [SerializeField]
         public GroundController GroundController;
+        public bool simMode;
 
-        private BattleStates BatteState = BattleStates.NOTSTARTED;
+        private BattleStates BattleState = BattleStates.NOTSTARTED;
+
 
         public event CombatEvent PubCombatEvent;
 
@@ -52,8 +52,15 @@ namespace TabletopSimulator.Controller
             }
 
         }
-        public bool IsCombat { get => BatteState != BattleStates.NOTSTARTED && BatteState != BattleStates.REFRESHING; }
+        public bool IsCombat { get => BattleState != BattleStates.NOTSTARTED && BattleState != BattleStates.REFRESHING; }
         public int RoundNum { get; private set; }
+
+        // Movement Related Properties
+        private float baseMoveSpeed = .03f;
+        private Vector3 moveSpeed;
+        private float moveTime;
+        private List<Vector3Int> curPath = null;
+        private int curNode;
 
 
         public void Attack(Creature attacker, Creature defender)
@@ -179,7 +186,9 @@ namespace TabletopSimulator.Controller
             currentIdx = 0;
             RoundNum = 0;
             RollInitiatives();
-            BatteState = BattleStates.TURNSTART;
+            BattleState = BattleStates.TURNSTART;
+
+            curPath = null;
         }
 
         private void RollInitiatives()
@@ -197,13 +206,13 @@ namespace TabletopSimulator.Controller
         void Start()
         {
             RoundNum = 0;
-            BatteState = BattleStates.REFRESHING;
+            BattleState = BattleStates.REFRESHING;
         }
 
         // Update is called once per frame
         void Update()
         {
-            if (BatteState == BattleStates.REFRESHING)
+            if (BattleState == BattleStates.REFRESHING)
             {
                 RefreshStatus();
             }
@@ -227,13 +236,13 @@ namespace TabletopSimulator.Controller
                 Debug.LogWarning(JsonUtility.ToJson(data));
             }
 
-            if (Input.GetKeyDown(KeyCode.F5) || BatteState == BattleStates.NOTSTARTED)
+            if (Input.GetKeyDown(KeyCode.F5) || BattleState == BattleStates.NOTSTARTED)
             {
                 SpawnPoint[] spawners = GetComponentsInChildren<SpawnPoint>();
 
                 foreach (SpawnPoint spawner in spawners)
                 {
-                    spawner.DespawnAll();
+                    spawner.Despawn();
                 }
 
                 foreach (SpawnPoint spawner in spawners)
@@ -246,17 +255,42 @@ namespace TabletopSimulator.Controller
                     //PubCombatEvent -= creature.GetComponent<AIController>().CombatStrategy.HandleCombatEvent;
                 }
                 Entities.Clear();
-                BatteState = BattleStates.REFRESHING;
+                BattleState = BattleStates.REFRESHING;
             }
 
-            if (Entities.Count == 0 && BatteState != BattleStates.REFRESHING)
-                BatteState = BattleStates.NOTSTARTED;
+            if (curPath != null)
+            {
+                if (simMode)
+                {
+                    Entities[currentIdx].transform.position = GroundController.ControlledGrid.CellToWorld(curPath[curPath.Count - 1]);
+                    curPath = null;
+                }
+                else 
+                {
+                    Vector3 goal = GroundController.ControlledGrid.CellToWorld(curPath[curNode]);
+                    if (Entities[currentIdx].transform.position != goal)
+                    {
+                        if (moveTime == 0.0f)
+                            Entities[currentIdx].transform.position = goal;
+                        else
+                            Entities[currentIdx].transform.position = Vector3.SmoothDamp(Entities[currentIdx].transform.position, goal, ref moveSpeed, moveTime);
+                    }
+                    else if (curNode + 1 < curPath.Count)
+                    {
+                        curNode++;
+                    }
+                    else
+                    {
+                        curPath = null;
+                    }
+                }
+            }
 
             if (IsCombat)
             {
                 AIController ac = Entities[currentIdx].GetComponent<AIController>();
                 //PlayerController pc = Entities[currentIdx].GetComponent<PlayerController>();
-                if (BatteState == BattleStates.TURNSTART)
+                if (BattleState == BattleStates.TURNSTART)
                 {
                     if (currentIdx == 0)
                         RoundStart();
@@ -266,36 +300,36 @@ namespace TabletopSimulator.Controller
                     if (ac != null)
                     {
                         StartCoroutine(ac.CombatStrategy.DoMovement());
-                        BatteState = BattleStates.AIMOVING;
+                        BattleState = BattleStates.AIMOVING;
                     }
 
                     //if (Entities[currentIdx].GetComponent<PlayerController>() != null)
                     //    BatteState = BattleStates.PLAYERTURN;
                 }
 
-                else if (BatteState == BattleStates.AIMOVING)
+                else if (BattleState == BattleStates.AIMOVING)
                 {
-                    if (!Entities[currentIdx].IsMoving)
+                    if (curPath == null)
                     {
-                        BatteState = BattleStates.AIATTACK;
+                        BattleState = BattleStates.AIATTACK;
                     }
                 }
-                else if (BatteState == BattleStates.AIATTACK)
+                else if (BattleState == BattleStates.AIATTACK)
                 {
                     ac.CombatStrategy.DoCombatAction();
-                    BatteState = BattleStates.AISUPPORT;
+                    BattleState = BattleStates.AISUPPORT;
                 }
-                else if (BatteState == BattleStates.AISUPPORT)
+                else if (BattleState == BattleStates.AISUPPORT)
                 {
                     ac.CombatStrategy.DoSupportAction();
-                    BatteState = BattleStates.AIBONUS;
+                    BattleState = BattleStates.AIBONUS;
                 }
-                else if (BatteState == BattleStates.AIBONUS)
+                else if (BattleState == BattleStates.AIBONUS)
                 {
                     ac.CombatStrategy.DoBonusAction();
-                    BatteState = BattleStates.TURNEND;
+                    BattleState = BattleStates.TURNEND;
                 }
-                else if (BatteState == BattleStates.TURNEND)
+                else if (BattleState == BattleStates.TURNEND)
                 {
                     if (timeWaited > timeBetweenTurns)
                     {
@@ -316,10 +350,10 @@ namespace TabletopSimulator.Controller
                         currentIdx++;
 
                         if (continueCombat)
-                            BatteState = BattleStates.TURNSTART;
+                            BattleState = BattleStates.TURNSTART;
                         else
                         {
-                            BatteState = BattleStates.NOTSTARTED;
+                            BattleState = BattleStates.NOTSTARTED;
                         }
 
                         if (roundEnded || !continueCombat)

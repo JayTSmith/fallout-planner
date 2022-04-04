@@ -117,7 +117,7 @@ public class GroundController : MonoBehaviour
 
         RaycastHit2D[] results;
 
-        results = Physics2D.RaycastAll(origin, direction, Vector3.Distance(origin, goal));
+        results = Physics2D.RaycastAll(origin, direction, Vector3.Distance(origin, goal), 1 << LayerMask.NameToLayer("Cover"));
 
         foreach (RaycastHit2D raycast in results) {
             if (raycast && raycast.collider.TryGetComponent(out Tilemap tilemap)) {
@@ -186,6 +186,9 @@ public class GroundController : MonoBehaviour
 
                 foreach (Vector3Int neighborCell in GetTiles(currentCell, 1))
                 {
+                    if (TileHasFlag(neighborCell, TerrainFlags.IMPASSIBLE))
+                        continue;
+
                     costDictionary.TryGetValue(currentCell, out int tileCost);
                     tileCost += GetTileCost(neighborCell);
                     neighborCostKnown = costDictionary.TryGetValue(neighborCell, out int neighborCost);
@@ -327,6 +330,6 @@ public class GroundController : MonoBehaviour
     public bool IsTileOccupied(Vector3Int tile)
     {
         Collider2D col = Physics2D.OverlapPoint(ControlledGrid.CellToWorld(tile));
-        return col != null && col.GetComponent<Creature>() != null;
+        return col?.GetComponent<Creature>() != null;
     }
 }

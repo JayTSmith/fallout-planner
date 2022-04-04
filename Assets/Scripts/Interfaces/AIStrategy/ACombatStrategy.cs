@@ -8,8 +8,6 @@ namespace TabletopSimulator.AI
 {
     public abstract class ACombatStrategy
     {
-        public delegate void fuck();
-
         public GameObject Self { get; set; }
         protected AIController AIController { get => Self.GetComponent<AIController>(); }
         protected BattleController BattleController { get => AIController.BattleController; }

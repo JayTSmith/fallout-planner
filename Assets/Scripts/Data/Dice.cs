@@ -22,9 +22,11 @@ public class Die
         return madeDice[s];
     }
 
-    public int Roll()
+    public int Roll(System.Random rand = null)
     {
-        return (int)Mathf.Round(Random.value * (sides - 1)) + 1;
+        if (rand == null)
+            return (int)Mathf.Round(Random.value * (sides - 1)) + 1;
+        return rand.Next(sides) + 1;
     }
 
     public static implicit operator int(Die d) => d.Roll();

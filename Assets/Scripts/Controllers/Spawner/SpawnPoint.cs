@@ -2,9 +2,10 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TabletopSimulator.Combat;
 using TabletopSimulator.Controller;
 
-public class SpawnPoint : MonoBehaviour
+public class SpawnPoint : MonoBehaviour, ISpawn
 {
     public GroundController GroundController;
     public BattleController BattleController;
@@ -16,7 +17,7 @@ public class SpawnPoint : MonoBehaviour
     [Range(1, 10)]
     public int spawnNumber = 1;
 
-    public void DespawnAll()
+    public void Despawn()
     {
         GameObject go;
         for (int i = 0; i < transform.childCount; i++)
@@ -60,13 +61,16 @@ public class SpawnPoint : MonoBehaviour
         body.GetComponent<AIController>().BattleController = BattleController;
         body.GetComponent<AIController>().GroundController = GroundController;
 
-        body.GetComponentInChildren<SpriteRenderer>().color = NPCDefintions.NPCColors[spawn.npcID];
+        if (BattleController.simMode)
+            body.GetComponentInChildren<SpriteRenderer>().enabled = false;
+        else
+            body.GetComponentInChildren<SpriteRenderer>().color = NPCDefintions.NPCColors[spawn.npcID];
     }
 
     public void Spawn(bool despawn = false)
     {
         if (despawn)
-            DespawnAll();
+            Despawn();
 
         List<Vector3Int> validSpawnTiles = GetSpawnTiles();
         int validSpawnNumber = spawnNumber;
