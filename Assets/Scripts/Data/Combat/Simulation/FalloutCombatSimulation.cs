@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TabletopSimulator.Combat.Simulation
+namespace TTRPGSimulator.Combat.Simulation
 {
     public class FalloutCombatSimulation: ACombatSimulation
     {
-        public override List<ACombatEvent> Run() {
+        public override List<ASimulationEvent> Run() {
             return null;
         }
         public override void Reset() { 

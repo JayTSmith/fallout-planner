@@ -2,10 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using TabletopSimulator.Combat;
+using TTRPGSimulator.Combat.Simulation;
 using UnityEngine;
 
-namespace TabletopSimulator.AI
+namespace TTRPGSimulator.AI
 {
     public class RecklessStrategy : ACombatStrategy
     {
@@ -42,6 +42,7 @@ namespace TabletopSimulator.AI
 
             foreach (Creature combatant in BattleController.Entities)
             {
+                if (combatant == null) continue;
                 if (combatant.Equals(Self) || combatant.Equals(closest))
                 {
                     continue;

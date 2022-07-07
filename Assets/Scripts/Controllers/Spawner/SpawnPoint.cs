@@ -2,8 +2,8 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TabletopSimulator.Combat;
-using TabletopSimulator.Controller;
+using TTRPGSimulator.Combat;
+using TTRPGSimulator.Controller;
 
 public class SpawnPoint : MonoBehaviour, ISpawn
 {

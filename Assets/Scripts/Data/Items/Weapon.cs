@@ -22,6 +22,17 @@ public enum WeaponType {
     SPECIAL
 }
 
+public enum WeaponFireModes { 
+    SEMIAUTO,
+    FULLAUTO,
+    BURST
+}
+
+public struct WeaponFireMode {
+    public WeaponFireModes mode;
+    public int penalty;
+}
+
 public enum WeaponTrait { 
 }
 [SerializeField]

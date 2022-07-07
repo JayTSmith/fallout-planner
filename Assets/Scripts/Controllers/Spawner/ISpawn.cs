@@ -1,4 +1,4 @@
-﻿namespace TabletopSimulator.Combat {
+﻿namespace TTRPGSimulator.Combat {
     internal interface ISpawn
     {
         public void Spawn(bool despawn = false);

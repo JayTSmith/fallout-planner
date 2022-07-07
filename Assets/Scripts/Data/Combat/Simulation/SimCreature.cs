@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TabletopSimulator.Combat.Simulation {
+namespace TTRPGSimulator.Combat.Simulation {
     public struct SimCreature
     {
         public Vector3Int CellPos;

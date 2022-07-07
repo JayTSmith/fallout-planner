@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using TabletopSimulator.Combat;
-using TabletopSimulator.Controller;
+using TTRPGSimulator.Combat.Simulation;
+using TTRPGSimulator.Controller;
 using UnityEngine;
 
-namespace TabletopSimulator.AI
+namespace TTRPGSimulator.AI
 {
     public abstract class ACombatStrategy
     {
@@ -14,7 +14,7 @@ namespace TabletopSimulator.AI
         protected Creature Creature { get => Self.GetComponent<Creature>(); }
         protected GroundController GroundController { get => BattleController.GroundController; }
 
-        public virtual void HandleCombatEvent(ACombatEvent combatEvent) { Debug.Log("Pepe"); }
+        public virtual void HandleSimulationEvent(ASimulationEvent simEvent) { Debug.Log("Pepe"); }
 
         // Returns the goal position of the current movement. BattleController will adjust based on movement points.
         public virtual IEnumerator DoMovement()

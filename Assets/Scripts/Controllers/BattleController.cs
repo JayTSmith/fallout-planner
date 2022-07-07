@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-using TabletopSimulator.Utilites;
-using TabletopSimulator.Combat;
+using TTRPGSimulator.Utilites;
+using TTRPGSimulator.Combat.Simulation;
 
-namespace TabletopSimulator.Controller
+namespace TTRPGSimulator.Controller
 {
-    public class BattleController : MonoBehaviour, ICombatEventPublisher
+    public class BattleController : MonoBehaviour, ISimulationEventPublisher
     {
         enum BattleStates
         {
@@ -33,10 +33,14 @@ namespace TabletopSimulator.Controller
         public GroundController GroundController;
         public bool simMode;
 
+        List<ASimulationEvent> events = new List<ASimulationEvent>();
+
+        public IReadOnlyList<ASimulationEvent> Events { get => events.AsReadOnly(); }
+
         private BattleStates BattleState = BattleStates.NOTSTARTED;
+        private bool moveEventHandled = false;
 
-
-        public event CombatEvent PubCombatEvent;
+        public event SimluationEvent PubSimulationEvent;
 
         public GameObject CurrentPlayer
         {
@@ -136,18 +140,26 @@ namespace TabletopSimulator.Controller
             {
                 lineColor = new Vector4(255 * (1 - (defChar.Health / ((float)defChar.MaxHealth))), 0, 0, 255);
             }
-
+            /*
             Debug.Log($"{atkChar.Name} -> {defChar.Name}" +
                       $" Attack Roll: {atkRoll} (Roll: {rawAtkRoll} + WS: {atkChar[atkChar.EquippedWeapon.WeaponSkill]} - Penalty: {aimPenalty})" +
                       $" against {defAC} (AC: {defChar.AC} + Cover:{defender.CoverBonus(attacker.gameObject.transform.position)}).", attacker);
             Debug.Log($"Damage done: {potentialDmg} [Roll: {rawDmg} x DMG Mult: {atkChar.EquippedWeapon.Ammo.dmgMod} + Bonus: {atkChar.GetBonusDamage()} - DT: {effectiveDT} = ({defChar.GetDT(atkChar.EquippedWeapon.DamageType)} + {atkChar.EquippedWeapon.Ammo.dtMod})]" +
                       $" HP Remaining: {defChar.Health}", defender);
-            //Debug.DrawLine(attacker.transform.position, defender.transform.position, lineColor, 4.0f);
+            Debug.DrawLine(attacker.transform.position, defender.transform.position, lineColor, 4.0f); 
+            */
+
+            FireEvent(new AttackCombatEvent(atkChar, defChar, atkRoll, defAC, potentialDmg));
 
             if (isDead)
             {
                 Kill(defender);
             }
+        }
+
+        void FireEvent(ASimulationEvent event_) {
+            events.Add(event_);
+            PubSimulationEvent?.Invoke(event_);
         }
 
         void Kill(Creature c)
@@ -171,7 +183,7 @@ namespace TabletopSimulator.Controller
         private void RoundEnd()
         {
             Debug.Log($"Round {RoundNum} is over!");
-            PubCombatEvent?.Invoke(new EmptyCombatEvent(null));
+            PubSimulationEvent?.Invoke(new EmptyCombatEvent(null));
             currentIdx = 0;
         }
 
@@ -187,6 +199,8 @@ namespace TabletopSimulator.Controller
             RoundNum = 0;
             RollInitiatives();
             BattleState = BattleStates.TURNSTART;
+
+            events = new List<ASimulationEvent>();
 
             curPath = null;
         }
@@ -260,6 +274,13 @@ namespace TabletopSimulator.Controller
 
             if (curPath != null)
             {
+                if (!moveEventHandled) 
+                {
+                    AIController ac = Entities[currentIdx].GetComponent<AIController>();
+                    FireEvent(new MoveCombatEvent(ac.Creature, ac.Creature.CurrentCell, curPath[curNode]));
+                    moveEventHandled = true;
+                }
+
                 if (simMode)
                 {
                     Entities[currentIdx].transform.position = GroundController.ControlledGrid.CellToWorld(curPath[curPath.Count - 1]);
@@ -312,6 +333,7 @@ namespace TabletopSimulator.Controller
                     if (curPath == null)
                     {
                         BattleState = BattleStates.AIATTACK;
+                        moveEventHandled = false;
                     }
                 }
                 else if (BattleState == BattleStates.AIATTACK)
@@ -353,6 +375,7 @@ namespace TabletopSimulator.Controller
                             BattleState = BattleStates.TURNSTART;
                         else
                         {
+                            FireEvent(new SimulationOverEvent(this, faction, events));
                             BattleState = BattleStates.NOTSTARTED;
                         }
 

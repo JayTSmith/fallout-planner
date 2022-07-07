@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using TabletopSimulator.AI;
+using TTRPGSimulator.AI;
 using UnityEngine;
 
-namespace TabletopSimulator.Controller 
+namespace TTRPGSimulator.Controller 
 {
     public class AIController : MonoBehaviour
     {
