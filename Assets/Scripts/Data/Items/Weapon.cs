@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 public enum DamageType {
     KINETIC,
@@ -35,7 +36,7 @@ public struct WeaponFireMode {
 
 public enum WeaponTrait { 
 }
-[SerializeField]
+[SerializeField, Serializable]
 public class Weapon {
     public enum WEAPON_ID 
     { 
@@ -58,13 +59,13 @@ public class Weapon {
     public GameCharacter.Skill WeaponSkill { get; set; }
     public DicePool DamageDice { get; set; }
     public int Range { get; set; }
-    public Ammo Ammo { get; set; }
+    public AmmoID? Ammo { get; set; }
     public int MagAmmo { get; set; }
     public int MagCapacity { get; set; }
     public WeaponTrait Traits { get; set; }
 
     public Weapon(string name, WEAPON_ID id, DamageType damageType, WeaponType weaponType, GameCharacter.Skill skill,
-                  DicePool dicePool, int range, int capacity, Ammo? ammo = null,  WeaponTrait traits = 0) {
+                  DicePool dicePool, int range, int capacity, AmmoID? ammo = null,  WeaponTrait traits = 0) {
         Name = name;
         ID = id;
         this.DamageType = damageType;
@@ -73,7 +74,7 @@ public class Weapon {
         DamageDice = dicePool;
         Range = range;
         MagAmmo = capacity;
-        Ammo = ammo ?? AmmoFactory.build9mm();
+        Ammo = ammo;
         MagCapacity = capacity;
         Traits = traits;
     }
@@ -99,7 +100,7 @@ public static class WeaponFactory {
         DicePool pool = new DicePool();
         pool.Dice.Add(Die.makeDie(6));
 
-        return new Weapon("Ghoul Hands", Weapon.WEAPON_ID.GHOUL_HANDS, DamageType.KINETIC, WeaponType.UNARMED, GameCharacter.Skill.UNARMED, pool, 1, 20);
+        return new Weapon("Ghoul Hands", Weapon.WEAPON_ID.GHOUL_HANDS, DamageType.KINETIC, WeaponType.UNARMED, GameCharacter.Skill.UNARMED, pool, 1, -1);
     }
 
     private static Weapon BuildVarmintRifle()
@@ -107,21 +108,25 @@ public static class WeaponFactory {
         DicePool pool = new DicePool();
         pool.Dice.Add(Die.makeDie(8));
 
-        return new Weapon("Varmint Rifle", Weapon.WEAPON_ID.VARMINT_RIFLE, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, pool, 8, 5, AmmoFactory.build556());
+        return new Weapon("Varmint Rifle", Weapon.WEAPON_ID.VARMINT_RIFLE, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, pool, 8, 5, AmmoID.FIVEFIVESIX);
     }
-
+    // TODO CHANGE AMMO ID
     private static Weapon BuildLaserPistol()
     {
         DicePool pool = new DicePool();
         pool.Dice.Add(Die.makeDie(6));
         pool.Offset = 2;
 
-        return new Weapon("Laser Pistol", Weapon.WEAPON_ID.LASER_PISTOL, DamageType.ENERGY, WeaponType.ENERGY, GameCharacter.Skill.ENERGY, pool, 6, 20);
+        return new Weapon("Laser Pistol", Weapon.WEAPON_ID.LASER_PISTOL, DamageType.ENERGY, WeaponType.ENERGY, GameCharacter.Skill.ENERGY, pool, 6, 20, AmmoID.NINEMM);
     }
 
     public static Weapon Build(Weapon.WEAPON_ID wid)
     {
-        return weaponMap[wid]();
+        Weapon weapon = weaponMap[wid]();
+
+        Debug.LogWarning(JsonConvert.SerializeObject(weapon));
+
+        return weapon;
     }
 
     public static Weapon BuildBasicPistol()
@@ -130,20 +135,20 @@ public static class WeaponFactory {
         pool.Dice.Add(Die.makeDie(6));
         pool.Offset = 1;
 
-        return new Weapon("Basic Pistol", Weapon.WEAPON_ID.BASIC_PISTOL, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, pool, 4, 15);
+        return new Weapon("Basic Pistol", Weapon.WEAPON_ID.BASIC_PISTOL, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, pool, 4, 15, AmmoID.NINEMM);
     }
     private static Weapon BuildGodGun()
     {
         DicePool dice = new DicePool();
         dice.Offset = 100;
-        return new Weapon("GODGUN", Weapon.WEAPON_ID.DEBUG_BLASTER, DamageType.DIRECT, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, dice, 999, 999);
+        return new Weapon("GODGUN", Weapon.WEAPON_ID.DEBUG_BLASTER, DamageType.DIRECT, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, dice, 999, -1);
     }
 
     private static Weapon BuildVoid()
     {
-        return new Weapon("", Weapon.WEAPON_ID.DEBUG_NONE, DamageType.DIRECT, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, new DicePool(), 0, 5);
+        return new Weapon("", Weapon.WEAPON_ID.DEBUG_NONE, DamageType.DIRECT, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, new DicePool(), 0, -1);
     }
-
+    // TODO CHANGE AMMO ID
     private static Weapon BuildGarand()
     {
         DicePool pool = new DicePool();
@@ -151,18 +156,18 @@ public static class WeaponFactory {
         pool.Dice.Add(Die.makeDie(6));
         pool.Offset = 6;
 
-        return new Weapon("M1 Garand", Weapon.WEAPON_ID.GARAND, DamageType.KINETIC, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, pool, 7, 8);
+        return new Weapon("M1 Garand", Weapon.WEAPON_ID.GARAND, DamageType.KINETIC, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, pool, 7, 8, AmmoID.NINEMM);
     }
-
+    // TODO CHANGE AMMO ID
     private static Weapon Build45Pistol()
     {
         DicePool dice = new DicePool();
         dice.Dice.Add(Die.makeDie(8));
         dice.Offset = 4;
 
-        return new Weapon("45Pistol", Weapon.WEAPON_ID.M1911, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, dice, 5, 7);
+        return new Weapon("45Pistol", Weapon.WEAPON_ID.M1911, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, dice, 5, 7, AmmoID.NINEMM);
     }
-
+    // TODO CHANGE AMMO ID
     public static Weapon BuildHuntingRifle(){
         DicePool dice = new DicePool();
         // 2d10 damage pool
@@ -171,7 +176,7 @@ public static class WeaponFactory {
         dice.Offset = 6;
         // Damage range 8 - 18
 
-        return new Weapon("Hunting Rifle", Weapon.WEAPON_ID.HUNTING_RIFLE, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, dice, 9, 5);
+        return new Weapon("Hunting Rifle", Weapon.WEAPON_ID.HUNTING_RIFLE, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, dice, 9, 5, AmmoID.NINEMM);
     }
 }
 

@@ -110,29 +110,52 @@ namespace TTRPGSimulator.Controller
 
             int rawDmg = atkChar.EquippedWeapon.DamageDice.Roll();
             int potentialDmg;
+            Ammo ammo;
+
+            if (atkChar.EquippedWeapon.Ammo != null)
+            {
+                ammo = AmmoFactory.Get(atkChar.EquippedWeapon.Ammo.Value);
+            }
+            else
+            {
+                ammo = new Ammo(0.0f, 0.0f, 0.0f);
+            }
+
+            /*
             if (atkChar.EquippedWeapon.Ammo.dmgMult)
                 potentialDmg = (int)((rawDmg + atkChar.GetBonusDamage()) * atkChar.EquippedWeapon.Ammo.dmgMod) - defChar.GetDT(atkChar.EquippedWeapon.DamageType);
             else
                 potentialDmg = (int)((rawDmg + atkChar.GetBonusDamage()) + atkChar.EquippedWeapon.Ammo.dmgMod) - defChar.GetDT(atkChar.EquippedWeapon.DamageType);
             potentialDmg = Math.Max(potentialDmg, 0);
 
-            int effectiveDT;
+            
             if (atkChar.EquippedWeapon.Ammo.dtMult)
                 effectiveDT = defChar.GetDT(atkChar.EquippedWeapon.DamageType) + (int)atkChar.EquippedWeapon.Ammo.dtMod;
             else
                 effectiveDT = (int)(defChar.GetDT(atkChar.EquippedWeapon.DamageType) * atkChar.EquippedWeapon.Ammo.dtMod);
+            */
+
+            int effectiveDT;
+
+            potentialDmg = (int)((rawDmg + atkChar.GetBonusDamage() + ammo.dmgMod) * ammo.dmgScale);
+            effectiveDT = (int)((defChar.GetDT(atkChar.EquippedWeapon.DamageType) + (ammo.dtMod)) * ammo.dtScale);
+
+            potentialDmg = Math.Max(potentialDmg, 0);
             effectiveDT = Math.Max(effectiveDT, 0);
+
+            int actualDmg = Math.Max(0, potentialDmg - effectiveDT);
+
             // Chance to hit.
             atkRoll -= aimPenalty;
             if (atkRoll < defAC)
             {
-                potentialDmg = 0;
+                actualDmg = 0;
                 //return; // We failed to make an attack. Check for critical failure.
             }
-            bool isDead = defender.TakeDamage(potentialDmg);
+            bool isDead = defender.TakeDamage(actualDmg);
             // Check for critical success.
 
-            if (potentialDmg == 0)
+            if (actualDmg == 0)
             {
                 lineColor = Color.blue;
             }
@@ -149,7 +172,7 @@ namespace TTRPGSimulator.Controller
             Debug.DrawLine(attacker.transform.position, defender.transform.position, lineColor, 4.0f); 
             */
 
-            FireEvent(new AttackCombatEvent(atkChar, defChar, atkRoll, defAC, potentialDmg));
+            FireEvent(new AttackCombatEvent(atkChar, defChar, atkRoll, defAC, actualDmg));
 
             if (isDead)
             {
