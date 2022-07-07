@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="StyleSheets/my.uss" />
+    <ui:VisualElement style="flex-grow: 1; flex-shrink: 1;">
+        <ui:VisualElement name="SimContainer" style="flex-direction: row; flex-grow: 1;">
+            <ui:VisualElement name="SimListPanel" class="ui-panel" style="width: 18%; flex-grow: initial; height: auto;">
+                <ui:VisualElement name="SimDetailHeader" style="flex-direction: column; -unity-font-style: bold; align-items: stretch; font-size: 16px; border-bottom-color: rgb(159, 159, 159); color: rgb(219, 219, 219);">
+                    <ui:VisualElement name="SimNumberContainer" style="flex-direction: row;">
+                        <ui:Label text="# of Simulations Completed:" display-tooltip-when-elided="true" name="SimNumberLbl" />
+                        <ui:Label text="???" display-tooltip-when-elided="true" name="SimNumberDataLbl" style="height: 25px;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="SimChanceContainer" style="flex-direction: row;">
+                        <ui:Label text="Chance of Player Victory:" display-tooltip-when-elided="true" name="SimChanceLbl" />
+                        <ui:Label text="???" display-tooltip-when-elided="true" name="SimChanceDataLbl" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement style="height: 2px; width: 98%; border-left-color: rgb(185, 184, 184); border-right-color: rgb(185, 184, 184); border-top-color: rgb(185, 184, 184); border-bottom-color: rgb(185, 184, 184); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;" />
+                <ui:ScrollView name="SimScrollList" style="height: 90%; overflow: hidden;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="SimDetailPanel" class="ui-panel" style="position: absolute; left: 82%; top: 0; bottom: 0;">
+                <ui:ScrollView name="SimEventsScrollView" style="flex-grow: 1;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

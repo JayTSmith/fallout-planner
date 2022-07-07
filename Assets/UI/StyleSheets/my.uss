@@ -1,0 +1,7 @@
+.ui-panel {
+    width: 18%;
+    background-color: rgba(0, 0, 0, 0.16);
+    color: rgba(219, 219, 219, 255);
+    padding-left: 4px;
+    font-size: 16px;
+}
