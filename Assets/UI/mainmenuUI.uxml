@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/StyleSheets/my.uss?fileID=7433441132597879392&amp;guid=92c03975af8271e4ca82f537894a05e5&amp;type=3#my" />
+    <ui:VisualElement name="MainMenu" style="flex-grow: 1; flex-direction: row; align-items: center; justify-content: space-around; padding-top: 8px; padding-bottom: 8px; padding-right: 4px; padding-left: 4px;">
+        <ui:GroupBox style="height: 100%; width: 50%; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 2px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 3px;">
+            <ui:Button text="Item Editing" display-tooltip-when-elided="true" name="dataBtn" class="mainmenu-button" style="height: 50%; padding-left: 6px; padding-right: 6px; padding-top: 1px; padding-bottom: 1px; margin-left: 3px; margin-right: 3px; margin-top: 1px; margin-bottom: 1px;" />
+            <ui:Button text="Sim Builder" display-tooltip-when-elided="true" name="buildBtn" class="mainmenu-button" style="height: 50%; flex-grow: 1; margin-bottom: 1px;" />
+        </ui:GroupBox>
+        <ui:Button text="Simulation" display-tooltip-when-elided="true" name="simBtn" class="mainmenu-button" style="width: 50%;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="ItemMenu" style="display: none;" />
+</ui:UXML>

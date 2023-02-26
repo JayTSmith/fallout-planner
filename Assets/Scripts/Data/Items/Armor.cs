@@ -16,7 +16,8 @@ public class Armor
         NULL,
     }
 
-    public ARMOR_ID ID;
+    public string Name { get; private set; }
+    public string ID { get; private set; }
 
     public int AC { get; private set; }
     public int BDT { get; private set; }
@@ -24,9 +25,10 @@ public class Armor
 
     public int XDT { get; private set; }
 
-    public Armor(ARMOR_ID id, int ac, int bdt, int edt, int xdt)
+    public Armor(string id, string name, int ac, int bdt, int edt, int xdt)
     {
         ID = id;
+        Name = name; 
         AC = ac;
         BDT = bdt;
         EDT = edt;
@@ -48,36 +50,37 @@ public static class ArmorFactory
 
     private static Armor BuildScrap()
     {
-        return new Armor(Armor.ARMOR_ID.SCRAP, 8, 3, 1, 0);
+        return new Armor("scrap", "scrap", 8, 3, 1, 0);
     }
 
     private static Armor BuildLeatherJacket()
     {
-        return new Armor(Armor.ARMOR_ID.JACKET, 12, 0, 0, 0);
+        return new Armor("leatherjacket", "scrap", 12, 0, 0, 0);
     }
 
     private static Armor BuildFlak()
     {
-        return new Armor(Armor.ARMOR_ID.FLAK, 12, 4, 4, 6);
+        return new Armor("flakjacket", "scrap", 12, 4, 4, 6);
     }
 
     private static Armor BuildReinforced()
     {
-        return new Armor(Armor.ARMOR_ID.REINFORCED, 11, 3, 2, 2);
+        return new Armor("leatherreinforced", "scrap", 11, 3, 2, 2);
     }
 
     public static Armor Build(Armor.ARMOR_ID aid)
     {
+        if (!builderMap.ContainsKey(aid)) return null;
         return builderMap[aid]();
     }
 
     public static Armor BuildLeather()
     {
-        return new Armor(Armor.ARMOR_ID.LEATHER, 11, 1, 0, 1);
+        return new Armor("leather", "scrap", 11, 1, 0, 1);
     }
 
     public static Armor BuildCombat()
     {
-        return new Armor(Armor.ARMOR_ID.COMBAT, 14, 8, 6, 6);
+        return new Armor("combatbasic", "scrap", 14, 8, 6, 6);
     }
 } 

@@ -9,7 +9,7 @@ namespace TTRPGSimulator.Combat.Simulation
         public Vector3Int Start { get; set; }
         public Vector3Int Goal { get; set; }
 
-        public MoveCombatEvent(Creature src, Vector3Int goal, Vector3Int start) : base(src) 
+        public MoveCombatEvent(Creature src, Vector3Int start, Vector3Int goal) : base(src) 
         {
             Start = start;
             Goal = goal;

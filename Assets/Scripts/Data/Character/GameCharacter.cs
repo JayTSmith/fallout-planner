@@ -90,6 +90,23 @@ public class GameCharacter
         EquippedWeapon = WeaponFactory.BuildHuntingRifle();
     }
 
+    public GameCharacter(CharacterBase cbase) : this()
+    {
+        foreach (SPECIAL special in cbase.Special.Keys)
+        {
+            this[special] = cbase.Special[special];
+        }
+
+        foreach (Skill skill in cbase.Skills.Keys)
+        {
+            this[skill] = cbase.Skills[skill];
+        }
+
+        Name = cbase.Name;
+        MaxHealth = cbase.MaxHP;
+        Health = MaxHealth;
+    }
+
     internal int GetDT(DamageType damageType)
     {
         if (EquippedArmor == null) 

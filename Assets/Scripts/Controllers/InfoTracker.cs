@@ -32,7 +32,7 @@ namespace TTRPGSimulator.Controller
             BattleController[] battleConts = FindObjectsOfType<BattleController>();
             foreach (BattleController battleCont in battleConts) 
             {
-                battleCont.PubSimulationEvent += HandleSimEvent;
+                battleCont.PublishSimEvent += HandleSimEvent;
             }
             
         }

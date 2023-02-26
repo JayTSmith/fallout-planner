@@ -12,6 +12,7 @@ namespace TTRPGSimulator.AI
         public RecklessStrategy(GameObject go)
         {
             Self = go;
+            IsBusy = false;
         }
 
 
@@ -70,25 +71,29 @@ namespace TTRPGSimulator.AI
             // Get as close to the nearest enemy as we can.
             // Stances do not matter rn.
             Creature closestEnemy = GetClosestEnemy();
+            IsBusy = true;
 
             if (closestEnemy == null)
             {
+                IsBusy = false;
                 yield break;
             }
 
             Vector3Int goalTile = Creature.CurrentCell;
+            float goalDistance = Vector3Int.Distance(closestEnemy.CurrentCell, goalTile);
             foreach (Vector3Int tile in GroundController.GetTiles(closestEnemy.CurrentCell, 4))
             {
                 if (GroundController.CanMoveToTile(tile)
                     && (Creature.GameCharacter.EquippedWeapon.WeaponType == WeaponType.UNARMED || Creature.GameCharacter.EquippedWeapon.WeaponType == WeaponType.MELEE || GroundController.HasLineOfSight(tile, closestEnemy.CurrentCell)))
                 {
-                    float goalDistance = Vector3Int.Distance(closestEnemy.CurrentCell, goalTile);
                     float tileDistance = Vector3Int.Distance(closestEnemy.CurrentCell, tile);
                     if (tileDistance < goalDistance)
                     {
+                        goalDistance = Vector3Int.Distance(closestEnemy.CurrentCell, goalTile);
                         goalTile = tile;
                     }
                 }
+                yield return null;
             }
 
             PathInfo path = GroundController.GetPath(Creature.CurrentCell, goalTile);
@@ -100,6 +105,7 @@ namespace TTRPGSimulator.AI
             if (path.Nodes.Count <= 1)
             {
                 // Means either we can't get to them or we're already hugging them.
+                IsBusy = false;
                 yield break;
             }
 
@@ -107,6 +113,7 @@ namespace TTRPGSimulator.AI
             Creature.GameCharacter.CurrentMovePoints -= path.Cost;
 
             Creature.MoveToCell(path.LastNode.Position);
+            IsBusy = false;
             // Since this could be destroyed in the middle of movement, we must do a null check.
             yield return new WaitWhile(() => Self != null && Creature.IsMoving);
 

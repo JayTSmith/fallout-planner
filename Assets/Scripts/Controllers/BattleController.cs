@@ -26,6 +26,8 @@ namespace TTRPGSimulator.Controller
             REFRESHING
         }
         public List<Creature> Entities { get; private set; } = new List<Creature>();
+        // Set by coroutines to determine if we are waiting to do something.
+        private bool isBusy;
         private int currentIdx = -1;
         [SerializeField]
         private float timeBetweenTurns;
@@ -39,8 +41,6 @@ namespace TTRPGSimulator.Controller
 
         private BattleStates BattleState = BattleStates.NOTSTARTED;
         private bool moveEventHandled = false;
-
-        public event SimluationEvent PubSimulationEvent;
 
         public GameObject CurrentPlayer
         {
@@ -66,6 +66,7 @@ namespace TTRPGSimulator.Controller
         private List<Vector3Int> curPath = null;
         private int curNode;
 
+        public event Action<ASimulationEvent> PublishSimEvent;
 
         public void Attack(Creature attacker, Creature defender)
         {
@@ -114,11 +115,11 @@ namespace TTRPGSimulator.Controller
 
             if (atkChar.EquippedWeapon.Ammo != null)
             {
-                ammo = AmmoFactory.Get(atkChar.EquippedWeapon.Ammo.Value);
+                ammo = AmmoFactory.Get(atkChar.EquippedWeapon.Ammo);
             }
             else
             {
-                ammo = new Ammo(0.0f, 0.0f, 0.0f);
+                ammo = new Ammo("", "", 0.0f, 0.0f, 0.0f);
             }
 
             /*
@@ -180,9 +181,10 @@ namespace TTRPGSimulator.Controller
             }
         }
 
-        void FireEvent(ASimulationEvent event_) {
+        void FireEvent(ASimulationEvent event_)
+        {
             events.Add(event_);
-            PubSimulationEvent?.Invoke(event_);
+            PublishSimEvent?.Invoke(event_);
         }
 
         void Kill(Creature c)
@@ -206,7 +208,7 @@ namespace TTRPGSimulator.Controller
         private void RoundEnd()
         {
             Debug.Log($"Round {RoundNum} is over!");
-            PubSimulationEvent?.Invoke(new EmptyCombatEvent(null));
+            PublishSimEvent?.Invoke(new EmptyCombatEvent(null));
             currentIdx = 0;
         }
 
@@ -215,7 +217,8 @@ namespace TTRPGSimulator.Controller
             foreach (Creature creature in GetComponentsInChildren<Creature>())
             {
                 Entities.Add(creature);
-                // PubCombatEvent += creature.GetComponent<AIController>().CombatStrategy.HandleCombatEvent;
+                PublishSimEvent += creature.GetComponent<AIController>().CombatStrategy.HandleSimulationEvent;
+                //PubCombatEvent += creature.GetComponent<AIController>().CombatStrategy.HandleCombatEvent;
             }
 
             currentIdx = 0;
@@ -243,7 +246,7 @@ namespace TTRPGSimulator.Controller
         void Start()
         {
             RoundNum = 0;
-            BattleState = BattleStates.REFRESHING;
+            BattleState = BattleStates.NOTSTARTED;
         }
 
         // Update is called once per frame
@@ -289,7 +292,7 @@ namespace TTRPGSimulator.Controller
 
                 foreach (Creature creature in Entities)
                 {
-                    //PubCombatEvent -= creature.GetComponent<AIController>().CombatStrategy.HandleCombatEvent;
+                    PublishSimEvent = null;
                 }
                 Entities.Clear();
                 BattleState = BattleStates.REFRESHING;
@@ -297,7 +300,7 @@ namespace TTRPGSimulator.Controller
 
             if (curPath != null)
             {
-                if (!moveEventHandled) 
+                if (!moveEventHandled)
                 {
                     AIController ac = Entities[currentIdx].GetComponent<AIController>();
                     FireEvent(new MoveCombatEvent(ac.Creature, ac.Creature.CurrentCell, curPath[curNode]));
@@ -309,7 +312,7 @@ namespace TTRPGSimulator.Controller
                     Entities[currentIdx].transform.position = GroundController.ControlledGrid.CellToWorld(curPath[curPath.Count - 1]);
                     curPath = null;
                 }
-                else 
+                else
                 {
                     Vector3 goal = GroundController.ControlledGrid.CellToWorld(curPath[curNode]);
                     if (Entities[currentIdx].transform.position != goal)

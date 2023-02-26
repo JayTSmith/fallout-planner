@@ -4,5 +4,20 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/mainmenu.unity
+    guid: 225fbeaa78fce0a4f9ccb76f6928dc2d
+  - enabled: 1
+    path: Assets/Scenes/dataeditor.unity
+    guid: 4e613826056cba243b607ee9eb720747
+  - enabled: 0
+    path: Assets/Scenes/mapbuilder.unity
+    guid: 53ff86474deb33346adad376493ef272
+  - enabled: 1
+    path: Assets/Scenes/simbuilder.unity
+    guid: 17f0ab4974ad9a34ebd526e7377b7819
+  - enabled: 1
+    path: Assets/Scenes/simulation.unity
+    guid: 95ab0b44e3e049746b68ef7fa7a31650
   m_configObjects: {}

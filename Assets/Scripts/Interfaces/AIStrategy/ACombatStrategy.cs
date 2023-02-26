@@ -9,12 +9,15 @@ namespace TTRPGSimulator.AI
     public abstract class ACombatStrategy
     {
         public GameObject Self { get; set; }
+        public bool IsBusy { get; set; }
         protected AIController AIController { get => Self.GetComponent<AIController>(); }
         protected BattleController BattleController { get => AIController.BattleController; }
         protected Creature Creature { get => Self.GetComponent<Creature>(); }
         protected GroundController GroundController { get => BattleController.GroundController; }
 
-        public virtual void HandleSimulationEvent(ASimulationEvent simEvent) { Debug.Log("Pepe"); }
+        public virtual void HandleSimulationEvent(ASimulationEvent simEvent) {
+            Debug.Log(simEvent.GetType()); 
+        }
 
         // Returns the goal position of the current movement. BattleController will adjust based on movement points.
         public virtual IEnumerator DoMovement()

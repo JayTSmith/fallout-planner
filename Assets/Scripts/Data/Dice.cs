@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Die
 {
-    private int sides;
+    public readonly int sides;
 
     private static Dictionary<int, Die> madeDice = new Dictionary<int, Die>();
 

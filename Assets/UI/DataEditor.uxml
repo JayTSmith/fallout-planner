@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
+    <ui:VisualElement name="DataEditorRoot" style="flex-grow: 1; width: auto; flex-direction: row;">
+        <ui:ScrollView name="DataEditorLeftSide" style="padding-left: 4px; padding-right: 4px; padding-top: 4px; padding-bottom: 4px; width: 50%;">
+            <ui:VisualElement name="DataEditorList" style="width: auto;">
+                <ui:Foldout text="Armors" name="ArmorFoldout" />
+                <ui:Foldout text="Ammo" name="AmmoFoldout" />
+                <ui:Foldout text="Characters" name="CharacterFoldout" />
+                <ui:Foldout text="Weapons" name="WeaponFoldout" />
+            </ui:VisualElement>
+        </ui:ScrollView>
+        <ui:ScrollView name="DataEditorRightSide" style="width: 50%;" />
+    </ui:VisualElement>
+</ui:UXML>

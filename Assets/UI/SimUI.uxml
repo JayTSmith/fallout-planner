@@ -1,9 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="StyleSheets/my.uss" />
+    <Style src="project://database/Assets/UI/StyleSheets/my.uss?fileID=7433441132597879392&amp;guid=92c03975af8271e4ca82f537894a05e5&amp;type=3#my" />
     <ui:VisualElement style="flex-grow: 1; flex-shrink: 1;">
         <ui:VisualElement name="SimContainer" style="flex-direction: row; flex-grow: 1;">
-            <ui:VisualElement name="SimListPanel" class="ui-panel" style="width: 18%; flex-grow: initial; height: auto;">
-                <ui:VisualElement name="SimDetailHeader" style="flex-direction: column; -unity-font-style: bold; align-items: stretch; font-size: 16px; border-bottom-color: rgb(159, 159, 159); color: rgb(219, 219, 219);">
+            <ui:VisualElement name="SimListPanel" class="ui-panel" style="width: 18%; flex-grow: initial; height: auto; font-size: 12px;">
+                <ui:VisualElement name="SimDetailHeader" style="flex-direction: column; -unity-font-style: bold; align-items: stretch; border-bottom-color: rgb(159, 159, 159); color: rgb(219, 219, 219); font-size: 12px;">
                     <ui:VisualElement name="SimNumberContainer" style="flex-direction: row;">
                         <ui:Label text="# of Simulations Completed:" display-tooltip-when-elided="true" name="SimNumberLbl" />
                         <ui:Label text="???" display-tooltip-when-elided="true" name="SimNumberDataLbl" style="height: 25px;" />

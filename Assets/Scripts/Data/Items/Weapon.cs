@@ -52,20 +52,20 @@ public class Weapon {
     }
 
     public string Name { get; set; }
-    public WEAPON_ID ID { get; set; }
+    public string ID { get; set; }
     public DamageType DamageType { get; set; }
     public WeaponType WeaponType { get; set; }
     // Why is this seperate? Certain weapons are of a unique type and may have a different skill required for operation.
     public GameCharacter.Skill WeaponSkill { get; set; }
     public DicePool DamageDice { get; set; }
     public int Range { get; set; }
-    public AmmoID? Ammo { get; set; }
+    public string Ammo { get; set; }
     public int MagAmmo { get; set; }
     public int MagCapacity { get; set; }
     public WeaponTrait Traits { get; set; }
 
-    public Weapon(string name, WEAPON_ID id, DamageType damageType, WeaponType weaponType, GameCharacter.Skill skill,
-                  DicePool dicePool, int range, int capacity, AmmoID? ammo = null,  WeaponTrait traits = 0) {
+    public Weapon(string name, string id, DamageType damageType, WeaponType weaponType, GameCharacter.Skill skill,
+                  DicePool dicePool, int range, int capacity, string ammo = null,  WeaponTrait traits = 0) {
         Name = name;
         ID = id;
         this.DamageType = damageType;
@@ -100,7 +100,7 @@ public static class WeaponFactory {
         DicePool pool = new DicePool();
         pool.Dice.Add(Die.makeDie(6));
 
-        return new Weapon("Ghoul Hands", Weapon.WEAPON_ID.GHOUL_HANDS, DamageType.KINETIC, WeaponType.UNARMED, GameCharacter.Skill.UNARMED, pool, 1, -1);
+        return new Weapon("Ghoul Hands", "ghoulhands", DamageType.KINETIC, WeaponType.UNARMED, GameCharacter.Skill.UNARMED, pool, 1, -1);
     }
 
     private static Weapon BuildVarmintRifle()
@@ -108,7 +108,7 @@ public static class WeaponFactory {
         DicePool pool = new DicePool();
         pool.Dice.Add(Die.makeDie(8));
 
-        return new Weapon("Varmint Rifle", Weapon.WEAPON_ID.VARMINT_RIFLE, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, pool, 8, 5, AmmoID.FIVEFIVESIX);
+        return new Weapon("Varmint Rifle", "varmintrifle", DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, pool, 8, 5, "556");
     }
     // TODO CHANGE AMMO ID
     private static Weapon BuildLaserPistol()
@@ -117,14 +117,12 @@ public static class WeaponFactory {
         pool.Dice.Add(Die.makeDie(6));
         pool.Offset = 2;
 
-        return new Weapon("Laser Pistol", Weapon.WEAPON_ID.LASER_PISTOL, DamageType.ENERGY, WeaponType.ENERGY, GameCharacter.Skill.ENERGY, pool, 6, 20, AmmoID.NINEMM);
+        return new Weapon("Laser Pistol", "laserpistol", DamageType.ENERGY, WeaponType.ENERGY, GameCharacter.Skill.ENERGY, pool, 6, 20, "9mm");
     }
 
     public static Weapon Build(Weapon.WEAPON_ID wid)
     {
         Weapon weapon = weaponMap[wid]();
-
-        Debug.LogWarning(JsonConvert.SerializeObject(weapon));
 
         return weapon;
     }
@@ -135,18 +133,18 @@ public static class WeaponFactory {
         pool.Dice.Add(Die.makeDie(6));
         pool.Offset = 1;
 
-        return new Weapon("Basic Pistol", Weapon.WEAPON_ID.BASIC_PISTOL, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, pool, 4, 15, AmmoID.NINEMM);
+        return new Weapon("Basic Pistol", "basicpistol", DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, pool, 4, 15, "9mm");
     }
     private static Weapon BuildGodGun()
     {
         DicePool dice = new DicePool();
         dice.Offset = 100;
-        return new Weapon("GODGUN", Weapon.WEAPON_ID.DEBUG_BLASTER, DamageType.DIRECT, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, dice, 999, -1);
+        return new Weapon("GODGUN", "debuggodgun", DamageType.DIRECT, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, dice, 999, -1);
     }
 
     private static Weapon BuildVoid()
     {
-        return new Weapon("", Weapon.WEAPON_ID.DEBUG_NONE, DamageType.DIRECT, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, new DicePool(), 0, -1);
+        return new Weapon("", "debugnull", DamageType.DIRECT, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, new DicePool(), 0, -1);
     }
     // TODO CHANGE AMMO ID
     private static Weapon BuildGarand()
@@ -156,7 +154,7 @@ public static class WeaponFactory {
         pool.Dice.Add(Die.makeDie(6));
         pool.Offset = 6;
 
-        return new Weapon("M1 Garand", Weapon.WEAPON_ID.GARAND, DamageType.KINETIC, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, pool, 7, 8, AmmoID.NINEMM);
+        return new Weapon("M1 Garand", "m1garand", DamageType.KINETIC, WeaponType.NONE, GameCharacter.Skill.BALLISTIC, pool, 7, 8, "9mm");
     }
     // TODO CHANGE AMMO ID
     private static Weapon Build45Pistol()
@@ -165,7 +163,7 @@ public static class WeaponFactory {
         dice.Dice.Add(Die.makeDie(8));
         dice.Offset = 4;
 
-        return new Weapon("45Pistol", Weapon.WEAPON_ID.M1911, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, dice, 5, 7, AmmoID.NINEMM);
+        return new Weapon("45Pistol", "m1911", DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, dice, 5, 7, "9mm");
     }
     // TODO CHANGE AMMO ID
     public static Weapon BuildHuntingRifle(){
@@ -176,7 +174,7 @@ public static class WeaponFactory {
         dice.Offset = 6;
         // Damage range 8 - 18
 
-        return new Weapon("Hunting Rifle", Weapon.WEAPON_ID.HUNTING_RIFLE, DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, dice, 9, 5, AmmoID.NINEMM);
+        return new Weapon("Hunting Rifle", "huntingrifle", DamageType.KINETIC, WeaponType.BALLISTIC, GameCharacter.Skill.BALLISTIC, dice, 9, 5, "9mm");
     }
 }
 
