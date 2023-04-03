@@ -26,7 +26,7 @@ public struct PathInfo
         } 
     }
 
-    public PathNode LastNode { get => Nodes[Nodes.Count-1];}
+    public PathNode? LastNode { get => (Nodes.Count == 0 ? null : Nodes[^1]);}
 
     public PathInfo(List<PathNode> n)
     {
@@ -157,6 +157,12 @@ public class GroundController : MonoBehaviour
         bool neighborCostKnown;
         costDictionary.Add(start, 0);
 
+        // Well, this is kinda obvious.
+        if (start == goal)
+        {
+            return new PathInfo(path);
+        }
+
 
         // If we can't get to that tile in the first place, so no reason to waste time.
         // If there is already something there, we can't do anything about it.
@@ -282,7 +288,7 @@ public class GroundController : MonoBehaviour
                 continue;
             }
             string name = tilemap.GetTile(tile).name;
-            TerrainInfo.TryGetValue(name, out TerrainFlags tileFlags);
+            TerrainFlags tileFlags = TerrainInfo[name];
             onMaps += 1;
             flags |= tileFlags;
         }
@@ -331,5 +337,20 @@ public class GroundController : MonoBehaviour
     {
         Collider2D col = Physics2D.OverlapPoint(ControlledGrid.CellToWorld(tile));
         return col?.GetComponent<Creature>() != null;
+    }
+
+    // Used to clean up paths for Creatures
+    public PathInfo FixPath(PathInfo path, int maxNodes) {
+        int numNodes = Math.Min(path.Cost, maxNodes);
+
+        while (path.Cost > maxNodes) { 
+            path.Nodes.RemoveAt(path.Nodes.Count - 1);
+        }
+
+        while (path.LastNode != null && IsTileOccupied(path.LastNode.Value.Position)) {
+            path.Nodes.RemoveAt(path.Nodes.Count - 1);
+        }
+
+        return path;
     }
 }

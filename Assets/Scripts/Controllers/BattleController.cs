@@ -26,21 +26,19 @@ namespace TTRPGSimulator.Controller
             REFRESHING
         }
         public List<Creature> Entities { get; private set; } = new List<Creature>();
-        // Set by coroutines to determine if we are waiting to do something.
-        private bool isBusy;
         private int currentIdx = -1;
         [SerializeField]
         private float timeBetweenTurns;
         private float timeWaited;
         public GroundController GroundController;
+        public InfoTracker InfoTracker;
         public bool simMode;
 
-        List<ASimulationEvent> events = new List<ASimulationEvent>();
+        List<ASimulationEvent> events = new();
 
         public IReadOnlyList<ASimulationEvent> Events { get => events.AsReadOnly(); }
 
         private BattleStates BattleState = BattleStates.NOTSTARTED;
-        private bool moveEventHandled = false;
 
         public GameObject CurrentPlayer
         {
@@ -59,12 +57,6 @@ namespace TTRPGSimulator.Controller
         public bool IsCombat { get => BattleState != BattleStates.NOTSTARTED && BattleState != BattleStates.REFRESHING; }
         public int RoundNum { get; private set; }
 
-        // Movement Related Properties
-        private float baseMoveSpeed = .03f;
-        private Vector3 moveSpeed;
-        private float moveTime;
-        private List<Vector3Int> curPath = null;
-        private int curNode;
 
         public event Action<ASimulationEvent> PublishSimEvent;
 
@@ -72,7 +64,7 @@ namespace TTRPGSimulator.Controller
         {
             GameCharacter atkChar = attacker.GameCharacter;
             GameCharacter defChar = defender.GameCharacter;
-            Color lineColor = new Vector4(0, 0, 0, 0);
+            //Color lineColor = new Vector4(0, 0, 0, 0);
 
             int rawAtkRoll = Die.makeDie(20).Roll();
             int atkRoll = rawAtkRoll + atkChar[atkChar.EquippedWeapon.WeaponSkill];
@@ -155,7 +147,7 @@ namespace TTRPGSimulator.Controller
             }
             bool isDead = defender.TakeDamage(actualDmg);
             // Check for critical success.
-
+            /*
             if (actualDmg == 0)
             {
                 lineColor = Color.blue;
@@ -164,7 +156,7 @@ namespace TTRPGSimulator.Controller
             {
                 lineColor = new Vector4(255 * (1 - (defChar.Health / ((float)defChar.MaxHealth))), 0, 0, 255);
             }
-            /*
+            
             Debug.Log($"{atkChar.Name} -> {defChar.Name}" +
                       $" Attack Roll: {atkRoll} (Roll: {rawAtkRoll} + WS: {atkChar[atkChar.EquippedWeapon.WeaponSkill]} - Penalty: {aimPenalty})" +
                       $" against {defAC} (AC: {defChar.AC} + Cover:{defender.CoverBonus(attacker.gameObject.transform.position)}).", attacker);
@@ -208,12 +200,15 @@ namespace TTRPGSimulator.Controller
         private void RoundEnd()
         {
             Debug.Log($"Round {RoundNum} is over!");
-            PublishSimEvent?.Invoke(new EmptyCombatEvent(null));
+            FireEvent(new RoundChangeEvent(null));
             currentIdx = 0;
         }
 
         public void RefreshStatus()
         {
+            PublishSimEvent = null;
+            Entities.Clear();
+
             foreach (Creature creature in GetComponentsInChildren<Creature>())
             {
                 Entities.Add(creature);
@@ -221,14 +216,20 @@ namespace TTRPGSimulator.Controller
                 //PubCombatEvent += creature.GetComponent<AIController>().CombatStrategy.HandleCombatEvent;
             }
 
+            if (InfoTracker != null && InfoTracker.enabled)
+            {
+                PublishSimEvent += InfoTracker.HandleSimEvent;
+            }
+
             currentIdx = 0;
             RoundNum = 0;
             RollInitiatives();
             BattleState = BattleStates.TURNSTART;
 
+            // DO NOT CLEAR; This reference is passed over to the SimluationOverEvent. If we clear, that event list will also be cleared.
             events = new List<ASimulationEvent>();
 
-            curPath = null;
+            FireEvent(new RoundChangeEvent(null));
         }
 
         private void RollInitiatives()
@@ -275,8 +276,9 @@ namespace TTRPGSimulator.Controller
                 }
                 Debug.LogWarning(JsonUtility.ToJson(data));
             }
-
-            if (Input.GetKeyDown(KeyCode.F5) || BattleState == BattleStates.NOTSTARTED)
+            
+            
+            if (BattleState == BattleStates.NOTSTARTED)
             {
                 SpawnPoint[] spawners = GetComponentsInChildren<SpawnPoint>();
 
@@ -290,53 +292,15 @@ namespace TTRPGSimulator.Controller
                     spawner.Spawn();
                 }
 
-                foreach (Creature creature in Entities)
-                {
-                    PublishSimEvent = null;
-                }
-                Entities.Clear();
                 BattleState = BattleStates.REFRESHING;
             }
-
-            if (curPath != null)
-            {
-                if (!moveEventHandled)
-                {
-                    AIController ac = Entities[currentIdx].GetComponent<AIController>();
-                    FireEvent(new MoveCombatEvent(ac.Creature, ac.Creature.CurrentCell, curPath[curNode]));
-                    moveEventHandled = true;
-                }
-
-                if (simMode)
-                {
-                    Entities[currentIdx].transform.position = GroundController.ControlledGrid.CellToWorld(curPath[curPath.Count - 1]);
-                    curPath = null;
-                }
-                else
-                {
-                    Vector3 goal = GroundController.ControlledGrid.CellToWorld(curPath[curNode]);
-                    if (Entities[currentIdx].transform.position != goal)
-                    {
-                        if (moveTime == 0.0f)
-                            Entities[currentIdx].transform.position = goal;
-                        else
-                            Entities[currentIdx].transform.position = Vector3.SmoothDamp(Entities[currentIdx].transform.position, goal, ref moveSpeed, moveTime);
-                    }
-                    else if (curNode + 1 < curPath.Count)
-                    {
-                        curNode++;
-                    }
-                    else
-                    {
-                        curPath = null;
-                    }
-                }
-            }
+            
 
             if (IsCombat)
             {
                 AIController ac = Entities[currentIdx].GetComponent<AIController>();
                 //PlayerController pc = Entities[currentIdx].GetComponent<PlayerController>();
+                // TODO Convert to switch statement.
                 if (BattleState == BattleStates.TURNSTART)
                 {
                     if (currentIdx == 0)
@@ -349,17 +313,13 @@ namespace TTRPGSimulator.Controller
                         StartCoroutine(ac.CombatStrategy.DoMovement());
                         BattleState = BattleStates.AIMOVING;
                     }
-
-                    //if (Entities[currentIdx].GetComponent<PlayerController>() != null)
-                    //    BatteState = BattleStates.PLAYERTURN;
                 }
 
                 else if (BattleState == BattleStates.AIMOVING)
                 {
-                    if (curPath == null)
+                    if (!Entities[currentIdx].IsMoving && !ac.CombatStrategy.IsBusy)
                     {
                         BattleState = BattleStates.AIATTACK;
-                        moveEventHandled = false;
                     }
                 }
                 else if (BattleState == BattleStates.AIATTACK)

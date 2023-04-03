@@ -28,16 +28,9 @@ namespace TTRPGSimulator.Controller
         void Start()
         {
             uiController = GetComponent<UIController>();
-
-            BattleController[] battleConts = FindObjectsOfType<BattleController>();
-            foreach (BattleController battleCont in battleConts) 
-            {
-                battleCont.PublishSimEvent += HandleSimEvent;
-            }
-            
         }
 
-        private void HandleSimEvent(ASimulationEvent simEvent) 
+        public void HandleSimEvent(ASimulationEvent simEvent) 
         {
             if (simEvent is SimulationStartEvent stEvent)
             {
