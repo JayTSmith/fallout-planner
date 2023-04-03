@@ -16,7 +16,7 @@ namespace TTRPGSimulator.AI
         protected GroundController GroundController { get => BattleController.GroundController; }
 
         public virtual void HandleSimulationEvent(ASimulationEvent simEvent) {
-            Debug.Log(simEvent.GetType()); 
+            simEvent.timesHandled++;
         }
 
         // Returns the goal position of the current movement. BattleController will adjust based on movement points.

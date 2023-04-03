@@ -9,6 +9,7 @@ namespace TTRPGSimulator.Combat.Simulation
     {
         public object Source;
         public object? Target;
+        public int timesHandled = 0;
 
         protected ASimulationEvent(object src) : this(src, null) {}
         protected ASimulationEvent(object src, object? target) {
