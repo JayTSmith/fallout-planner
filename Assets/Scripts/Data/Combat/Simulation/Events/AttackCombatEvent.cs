@@ -8,6 +8,7 @@ namespace TTRPGSimulator.Combat.Simulation
     {
         public int HitRoll { get; set; }
         public int DefenderAC { get; set; }
+        public int DefenderHealth { get; set; }
         public int DamageDone { get; set; }
 
         public AttackCombatEvent(GameCharacter src, GameCharacter target) : this(src, target, 0, 0, 0) { }
@@ -17,11 +18,18 @@ namespace TTRPGSimulator.Combat.Simulation
             HitRoll = hit;
             DefenderAC = ac;
             DamageDone = dmg;
+            DefenderHealth = target.Health;
         }
 
         public override string GetText()
         {
-            return $"{((GameCharacter) Source).Name} {(HitRoll > ((GameCharacter) Target).AC ? "hit" : "missed")} {((GameCharacter) Target).Name}! Damage done: {DamageDone} | HP Left: {((GameCharacter) Target).Health}";
+            string descript = $"{((GameCharacter)Source).Name} {(HitRoll > DefenderAC ? "hit" : "missed")} {((GameCharacter)Target).Name}!";
+            string damageStr = $" | Damage Done: {DamageDone}";
+            string hpStr = $" | HP Left: {DefenderHealth}";
+
+            if (HitRoll >= DefenderAC)
+                return descript + damageStr + hpStr;
+            return descript + hpStr;
         }
     }
 }
