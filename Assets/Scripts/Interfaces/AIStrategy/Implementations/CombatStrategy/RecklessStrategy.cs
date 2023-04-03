@@ -9,17 +9,21 @@ namespace TTRPGSimulator.AI
 {
     public class RecklessStrategy : ACombatStrategy
     {
+        private bool moveUsed = false;
+        private bool combatUsed = false;
+        private bool supportUsed = false;
+
         public RecklessStrategy(GameObject go)
         {
             Self = go;
             IsBusy = false;
         }
 
-
         public override void DoCombatAction()
         {
             Creature closestEnemy = GetClosestEnemy();
-            if (Creature.GameCharacter.EquippedWeapon.MagAmmo > 0
+            bool isWeaponMelee = Creature.GameCharacter.EquippedWeapon.WeaponType == WeaponType.UNARMED || Creature.GameCharacter.EquippedWeapon.WeaponType == WeaponType.MELEE;
+            if ((Creature.GameCharacter.EquippedWeapon.MagAmmo > 0 || isWeaponMelee)
                 && closestEnemy != null)
             {
                 BattleController.Attack(Creature, closestEnemy);
@@ -32,6 +36,7 @@ namespace TTRPGSimulator.AI
             else
             {
                 // We ain't got line of sight so oops.
+                combatUsed = true;
             }
 
         }
@@ -44,6 +49,7 @@ namespace TTRPGSimulator.AI
             foreach (Creature combatant in BattleController.Entities)
             {
                 if (combatant == null) continue;
+                if (!combatant.isActiveAndEnabled) continue;
                 if (combatant.Equals(Self) || combatant.Equals(closest))
                 {
                     continue;
@@ -53,7 +59,7 @@ namespace TTRPGSimulator.AI
                 {
                     float curDist = Vector3Int.Distance(combatant.CurrentCell, Creature.CurrentCell);
                     // If we can't get to the creature, then it doens't matter if they're closer.
-                    if (curDist < distance && GroundController.GetPath(Creature.CurrentCell, combatant.CurrentCell).Nodes.Count > 0)
+                    if (curDist < distance)
                     {
                         closest = combatant;
                         distance = curDist;
@@ -81,8 +87,16 @@ namespace TTRPGSimulator.AI
 
             Vector3Int goalTile = Creature.CurrentCell;
             float goalDistance = Vector3Int.Distance(closestEnemy.CurrentCell, goalTile);
+            if (goalDistance < 2) 
+            {
+                IsBusy = false;
+                yield break;
+            }
+
             foreach (Vector3Int tile in GroundController.GetTiles(closestEnemy.CurrentCell, 4))
             {
+                if (Self == null) yield break;
+
                 if (GroundController.CanMoveToTile(tile)
                     && (Creature.GameCharacter.EquippedWeapon.WeaponType == WeaponType.UNARMED || Creature.GameCharacter.EquippedWeapon.WeaponType == WeaponType.MELEE || GroundController.HasLineOfSight(tile, closestEnemy.CurrentCell)))
                 {
@@ -97,10 +111,7 @@ namespace TTRPGSimulator.AI
             }
 
             PathInfo path = GroundController.GetPath(Creature.CurrentCell, goalTile);
-            while (path.Cost > Creature.GameCharacter.CurrentMovePoints)
-            {
-                path.Nodes.RemoveAt(path.Nodes.Count - 1);
-            }
+            path = GroundController.FixPath(path, Creature.GameCharacter.CurrentMovePoints);
 
             if (path.Nodes.Count <= 1)
             {
@@ -108,11 +119,12 @@ namespace TTRPGSimulator.AI
                 IsBusy = false;
                 yield break;
             }
-
-            //path.Nodes.RemoveAt(path.Nodes.Count); // Don't wanna move on top of the enemy.
             Creature.GameCharacter.CurrentMovePoints -= path.Cost;
 
-            Creature.MoveToCell(path.LastNode.Position);
+            // For some reason, the path we made is invalid. Cancel early.
+            if (!Creature.MoveToCell(path))
+                yield break;
+
             IsBusy = false;
             // Since this could be destroyed in the middle of movement, we must do a null check.
             yield return new WaitWhile(() => Self != null && Creature.IsMoving);

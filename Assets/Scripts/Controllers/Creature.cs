@@ -13,28 +13,23 @@ public class Creature : MonoBehaviour
 
     public Vector3Int CurrentCell { get => GroundController.ControlledGrid.WorldToCell(transform.position); }
     public bool IsMoving { get => curPath != null; }
-    [SerializeField]
+
     public GameCharacter GameCharacter { get; set; }
 
-    private Grid gameGrid { get => GroundController.ControlledGrid; }
+    private Grid GameGrid { get => GroundController.ControlledGrid; }
 
     private Vector3 moveSpeed;
     private float moveTime;
     private List<Vector3Int> curPath = null;
     private int curNode;
 
-    void Start()
-    {
-        
-    }
-
     // Update is called once per frame
     void Update()
     {
         CircleCollider2D collider = GetComponent<CircleCollider2D>();
-        if (curPath != null)
+        if (curPath?.Count > 0)
         {
-            Vector3 goal = gameGrid.CellToWorld(curPath[curNode]);
+            Vector3 goal = GameGrid.CellToWorld(curPath[curNode]);
             if (transform.position != goal)
             {
                 transform.position = Vector3.SmoothDamp(transform.position, goal, ref moveSpeed, moveTime);
@@ -61,15 +56,36 @@ public class Creature : MonoBehaviour
         return GroundController.GetCoverBonus(GroundController.ControlledGrid.WorldToCell(Vector3.MoveTowards(transform.position, from, 1.0f)));
     }
 
+    public bool MoveToCell(PathInfo path) {
+
+        List<Vector3Int> nodes = new();
+
+        foreach (PathNode pathNode in path.Nodes)
+        {
+            nodes.Add(pathNode.Position);
+        }
+
+        curPath = nodes;
+        curNode = 0;
+
+        if (curPath.Count == 0)
+        {
+            curPath = null;
+            return false;
+        }
+
+        return true;
+    }
+
     public bool MoveToCell(Vector3Int cell)
     {
         if (GroundController.CanMoveToTile(cell) && cell != CurrentCell)
         {
             // Debug.Log(string.Format("Making Path to {0} from {1}",cell, CurrentCell), this.gameObject);
             PathInfo path;
-            List<Vector3Int> nodes = new List<Vector3Int>();
+            List<Vector3Int> nodes = new();
 
-            path = GroundController.GetPath(gameGrid.WorldToCell(transform.position), cell);
+            path = GroundController.GetPath(GameGrid.WorldToCell(transform.position), cell);
             foreach (PathNode pathNode in path.Nodes)
                 nodes.Add(pathNode.Position);
 
@@ -88,10 +104,10 @@ public class Creature : MonoBehaviour
                 moveTime = baseMoveTime / curPath.Count;
             }
 
-            Debug.DrawLine(transform.position, gameGrid.GetCellCenterWorld(curPath[0]), Color.green, 3.0f);
+            Debug.DrawLine(transform.position, GameGrid.GetCellCenterWorld(curPath[0]), Color.green, 3.0f);
             for (int i = 0; i < curPath.Count - 1; i++)
             {
-                Debug.DrawLine(gameGrid.GetCellCenterWorld(curPath[i]), gameGrid.GetCellCenterWorld(curPath[i + 1]), Color.green, 3.0f);
+                Debug.DrawLine(GameGrid.GetCellCenterWorld(curPath[i]), GameGrid.GetCellCenterWorld(curPath[i + 1]), Color.green, 3.0f);
             }
 
             return true;
@@ -104,7 +120,7 @@ public class Creature : MonoBehaviour
         GameCharacter.Health -= damage;
         if (GameCharacter.Health <= 0)
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
         }
 
         return GameCharacter.Health <= 0;
